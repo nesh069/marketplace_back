@@ -1,4 +1,5 @@
 import logging
+import re
 
 from django.conf import settings
 from rest_framework import status
@@ -19,6 +20,12 @@ class InitiatePaymentView(APIView):
     def post(self, request):
         listing_id = request.data.get("listing_id")
         phone_number = request.data.get("phone_number")
+
+        if not phone_number or not re.match(r'^2547\d{8}$', str(phone_number)):
+            return Response(
+                {"error": "Phone number must be in format 2547XXXXXXXX (e.g. 254712345678)."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             listing = Listing.objects.get(id=listing_id)
