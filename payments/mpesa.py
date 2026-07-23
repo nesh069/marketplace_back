@@ -11,9 +11,14 @@ STK_PUSH_URL = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
 
 class MpesaService:
     def _get_access_token(self):
-        response = requests.get(
+        import base64
+        credentials = base64.b64encode(
+            f"{settings.MPESA_CONSUMER_KEY}:{settings.MPESA_CONSUMER_SECRET}".encode()
+        ).decode()
+        headers = {"Authorization": f"Basic {credentials}"}
+        response = requests.post(
             OAUTH_URL,
-            auth=(settings.MPESA_CONSUMER_KEY, settings.MPESA_CONSUMER_SECRET),
+            headers=headers,
             timeout=10,
         )
         response.raise_for_status()
