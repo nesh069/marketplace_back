@@ -58,7 +58,6 @@ class MpesaService:
             json=payload,
             headers={
                 "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json",
                 "User-Agent": "CampusMarketplace/1.0",
             },
             timeout=10,
