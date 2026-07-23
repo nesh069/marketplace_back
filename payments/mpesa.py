@@ -49,14 +49,18 @@ class MpesaService:
             "PartyB": settings.MPESA_SHORTCODE,
             "PhoneNumber": phone,
             "CallBackURL": settings.MPESA_CALLBACK_URL,
-            "AccountReference": f"Listing{transaction.listing.id}",
-            "TransactionDesc": f"Payment for {transaction.listing.title}"[:13],
+            "AccountReference": f"REF{transaction.listing.id}",
+            "TransactionDesc": "Purchase",
         }
 
         response = requests.post(
             STK_PUSH_URL,
             json=payload,
-            headers={"Authorization": f"Bearer {access_token}"},
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+                "User-Agent": "CampusMarketplace/1.0",
+            },
             timeout=10,
         )
         data = response.json()
