@@ -11,7 +11,7 @@ from marketplace.models import Listing
 
 from .models import Transaction
 from .pesapal import PesapalService
-from .serializers import TransactionSerializer
+from .serializers import TransactionSerializer, normalize_phone, validate_phone_number
 
 
 class InitiatePaymentView(APIView):
@@ -21,11 +21,18 @@ class InitiatePaymentView(APIView):
         listing_id = request.data.get("listing_id")
         phone_number = request.data.get("phone_number")
 
-        if not phone_number or not re.match(r'^2547\d{8}$', str(phone_number)):
+        if not phone_number:
+            return Response({"error": "Phone number is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            validate_phone_number(str(phone_number))
+        except Exception:
             return Response(
-                {"error": "Phone number must be in format 2547XXXXXXXX (e.g. 254712345678)."},
+                {"error": "Enter a valid Kenyan phone number: 07XXXXXXXX, 01XXXXXXXX, 2547XXXXXXXX, or +2547XXXXXXXX."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        phone_number = normalize_phone(str(phone_number))
 
         try:
             listing = Listing.objects.get(id=listing_id)

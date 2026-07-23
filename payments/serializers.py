@@ -7,9 +7,21 @@ from .models import Transaction
 
 
 def validate_phone_number(value):
-    if not re.match(r'^2547\d{8}$', value):
-        raise serializers.ValidationError("Phone number must be in format 2547XXXXXXXX (e.g. 254712345678).")
+    if not re.match(r'^(07\d{8}|01\d{8}|254[17]\d{8}|\+254[17]\d{8})$', value):
+        raise serializers.ValidationError(
+            "Enter a valid Kenyan phone number: 07XXXXXXXX, 01XXXXXXXX, 2547XXXXXXXX, or +2547XXXXXXXX."
+        )
     return value
+
+
+def normalize_phone(value):
+    """Convert any Kenyan phone format to 254XXXXXXXXX."""
+    cleaned = value.strip()
+    if cleaned.startswith('+'):
+        cleaned = cleaned[1:]
+    if cleaned.startswith('0'):
+        cleaned = '254' + cleaned[1:]
+    return cleaned
 
 
 class TransactionSerializer(serializers.ModelSerializer):
