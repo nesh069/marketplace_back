@@ -5,7 +5,6 @@ from django.conf import settings
 
 from .models import Transaction
 
-OAUTH_URL = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
 STK_PUSH_URL = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
 
 
@@ -16,15 +15,22 @@ class MpesaService:
         ).decode()
         headers = {
             "Authorization": f"Basic {credentials}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "User-Agent": "CampusMarketplace/1.0",
         }
-        response = requests.get(
-            OAUTH_URL,
+        body = {"grant_type": "client_credentials"}
+        response = requests.post(
+            "https://sandbox.safaricom.co.ke/oauth/v1/generate",
+            params={"grant_type": "client_credentials"},
+            json=body,
             headers=headers,
-            timeout=10,
+            timeout=15,
         )
         response.raise_for_status()
-        return response.json()["access_token"]
+        data = response.json()
+        if "access_token" in data:
+            return data["access_token"]
+        raise RuntimeError(f"Unexpected OAuth response: {data}")
 
     def _generate_password(self, timestamp):
         raw = f"{settings.MPESA_SHORTCODE}{settings.MPESA_PASSKEY}{timestamp}"
