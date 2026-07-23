@@ -7,7 +7,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from accounts.views import RegisterView
-from marketplace.views import CategoryViewSet, FavouriteViewSet, ListingViewSet, MessageViewSet
+from marketplace.views import CategoryViewSet, FavouriteViewSet, ListingViewSet, MessageViewSet, ReportViewSet
 from payments.views import InitiatePaymentView, PesapalCallbackView, PesapalRedirectView, PaymentStatusView
 
 router = DefaultRouter()
@@ -15,6 +15,7 @@ router.register("listings", ListingViewSet, basename="listing")
 router.register("categories", CategoryViewSet, basename="category")
 router.register("favorites", FavouriteViewSet, basename="favorite")
 router.register("messages", MessageViewSet, basename="message")
+router.register("reports", ReportViewSet, basename="report")
 
 urlpatterns = [
     path("admin/", admin.site.urls),

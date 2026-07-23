@@ -53,6 +53,28 @@ class Favourite(models.Model):
         return f"{self.user.email} -> {self.listing.title}"
 
 
+class Report(models.Model):
+    REASON_CHOICES = [
+        ("spam", "Spam"),
+        ("misleading", "Misleading"),
+        ("inappropriate", "Inappropriate content"),
+        ("rule_violation", "Violates campus rules"),
+        ("other", "Other"),
+    ]
+
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="reports")
+    reporter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    reason = models.CharField(max_length=30, choices=REASON_CHOICES)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.reporter.email} reported {self.listing.title} ({self.reason})"
+
+
 class Message(models.Model):
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -102,4 +102,26 @@ class PesapalCallbackView(APIView):
         return Response({"status": "received"}, status=status.HTTP_200_OK)
 
 
+class PesapalRedirectView(APIView):
+    permission_classes = [AllowAny]
+
+    STATUS_MAP = PesapalCallbackView.STATUS_MAP
+
+    def get(self, request):
+        """Handle redirect after payment."""
+        order_tracking_id = request.query_params.get("OrderTrackingId") or request.query_params.get("order_tracking_id")
+        raw_status = request.query_params.get("Status") or request.query_params.get("status", "")
+        mapped_status = self.STATUS_MAP.get(raw_status.upper(), "pending")
+
+        if order_tracking_id:
+            try:
+                PesapalService().confirm_payment(order_tracking_id, mapped_status, raw_status)
+            except Exception:
+                pass
+
+        from django.http import HttpResponseRedirect
+        frontend_url = f"{settings.FRONTEND_URL}/payment/callback?status={mapped_status}&order={order_tracking_id}"
+        return HttpResponseRedirect(frontend_url)
+
+
 
