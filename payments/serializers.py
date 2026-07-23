@@ -1,5 +1,6 @@
 import re
 
+from django.core.validators import MinValueValidator
 from rest_framework import serializers
 
 from .models import Transaction
@@ -12,6 +13,12 @@ def validate_phone_number(value):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(validators=[validate_phone_number])
+    amount = serializers.DecimalField(
+        max_digits=10, decimal_places=2,
+        validators=[MinValueValidator(1)],
+    )
+
     class Meta:
         model = Transaction
         fields = [

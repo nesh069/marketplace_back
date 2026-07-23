@@ -1,4 +1,4 @@
-from django.core.validators import MaxValueValidator, MinLengthValidator, MinValueValidator
+from django.core.validators import MaxLengthValidator, MaxValueValidator, MinLengthValidator, MinValueValidator
 from rest_framework import serializers
 
 from .models import Category, Favourite, Listing, Message, Report
@@ -13,7 +13,11 @@ class CategorySerializer(serializers.ModelSerializer):
 class ListingSerializer(serializers.ModelSerializer):
     seller = serializers.ReadOnlyField(source="seller.email")
     title = serializers.CharField(
-        validators=[MinLengthValidator(3)],
+        validators=[MinLengthValidator(3), MaxLengthValidator(120)],
+    )
+    description = serializers.CharField(
+        required=False, allow_blank=True,
+        validators=[MaxLengthValidator(2000)],
     )
     price = serializers.DecimalField(
         max_digits=10, decimal_places=2,
@@ -69,6 +73,8 @@ class FavouriteSerializer(serializers.ModelSerializer):
         listing = data.get("listing")
         if request and listing and listing.seller == request.user:
             raise serializers.ValidationError("You cannot favourite your own listing.")
+        if request and listing and Favourite.objects.filter(user=request.user, listing=listing).exists():
+            raise serializers.ValidationError("This listing is already in your favourites.")
         return data
 
 
@@ -92,6 +98,9 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ReportSerializer(serializers.ModelSerializer):
     reporter = serializers.ReadOnlyField(source="reporter.email")
+    reason = serializers.ChoiceField(choices=[
+        "spam", "misleading", "inappropriate", "rule_violation", "other",
+    ])
 
     class Meta:
         model = Report
