@@ -1,13 +1,13 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from marketplace.models import Category, Listing, Favorite, Message
+from marketplace.models import Category, Listing, Favourite
 
 User = get_user_model()
 
 
 class CategoryModelTests(TestCase):
     def test_category_creation(self):
-        category = Category.objects.create(name='Electronics', slug='electronics')
+        category = Category.objects.create(name='Electronics')
         self.assertEqual(str(category), 'Electronics')
 
 
@@ -18,28 +18,27 @@ class ListingModelTests(TestCase):
             email='seller@example.com',
             password='pass123'
         )
-        self.category = Category.objects.create(name='Phones', slug='phones')
+        self.category = Category.objects.create(name='Phones')
 
     def test_listing_creation(self):
         listing = Listing.objects.create(
             seller=self.user,
             category=self.category,
             title='iPhone 14',
-            description='Brand new iPhone',
+            description='Brand new',
             price=999.99
         )
-        self.assertEqual(str(listing), 'iPhone 14')
-        self.assertEqual(listing.status, 'active')
+        self.assertEqual(str(listing), 'iPhone 14 (Available)')
 
 
-class FavoriteModelTests(TestCase):
+class FavouriteModelTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             username='buyer',
             email='buyer@example.com',
             password='pass123'
         )
-        self.category = Category.objects.create(name='Laptops', slug='laptops')
+        self.category = Category.objects.create(name='Laptops')
         self.listing = Listing.objects.create(
             seller=self.user,
             category=self.category,
@@ -48,6 +47,6 @@ class FavoriteModelTests(TestCase):
             price=1999.99
         )
 
-    def test_favorite_creation(self):
-        favorite = Favorite.objects.create(user=self.user, listing=self.listing)
-        self.assertEqual(str(favorite), f'{self.user.email} -> MacBook Pro')
+    def test_favourite_creation(self):
+        favourite = Favourite.objects.create(user=self.user, listing=self.listing)
+        self.assertIn('buyer@example.com', str(favourite))

@@ -1,9 +1,9 @@
 from rest_framework import viewsets, permissions
 from rest_framework.exceptions import PermissionDenied
 
-from .models import Category, Favorite, Listing, Message
+from .models import Category, Favourite, Listing, Message
 from .serializers import (
-    CategorySerializer, FavoriteSerializer, ListingSerializer, MessageSerializer,
+    CategorySerializer, FavouriteSerializer, ListingSerializer, MessageSerializer,
 )
 
 
@@ -31,12 +31,12 @@ class ListingViewSet(viewsets.ModelViewSet):
         serializer.save(seller=self.request.user)
 
 
-class FavoriteViewSet(viewsets.ModelViewSet):
-    serializer_class = FavoriteSerializer
+class FavouriteViewSet(viewsets.ModelViewSet):
+    serializer_class = FavouriteSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Favorite.objects.filter(user=self.request.user)
+        return Favourite.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

@@ -7,13 +7,13 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from accounts.views import RegisterView
-from marketplace.views import CategoryViewSet, FavoriteViewSet, ListingViewSet, MessageViewSet
+from marketplace.views import CategoryViewSet, FavouriteViewSet, ListingViewSet, MessageViewSet
 from payments.views import InitiatePaymentView, PaymentStatusView
 
 router = DefaultRouter()
 router.register("listings", ListingViewSet, basename="listing")
 router.register("categories", CategoryViewSet, basename="category")
-router.register("favorites", FavoriteViewSet, basename="favorite")
+router.register("favorites", FavouriteViewSet, basename="favorite")
 router.register("messages", MessageViewSet, basename="message")
 
 urlpatterns = [

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Category, Favorite, Listing, Message
+from .models import Category, Favourite, Listing, Message
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -22,9 +22,9 @@ class ListingSerializer(serializers.ModelSerializer):
         read_only_fields = ["seller", "status", "created_at"]
 
 
-class FavoriteSerializer(serializers.ModelSerializer):
+class FavouriteSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Favorite
+        model = Favourite
         fields = ["id", "listing", "created_at"]
         read_only_fields = ["created_at"]
 
