@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinLengthValidator, MinValueValidator
 from rest_framework import serializers
 
 from .models import Category, Favourite, Listing, Message, Report
@@ -11,6 +12,13 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ListingSerializer(serializers.ModelSerializer):
     seller = serializers.ReadOnlyField(source="seller.email")
+    title = serializers.CharField(
+        validators=[MinLengthValidator(3)],
+    )
+    price = serializers.DecimalField(
+        max_digits=10, decimal_places=2,
+        validators=[MinValueValidator(1)],
+    )
     seller_id = serializers.ReadOnlyField(source="seller.id")
     seller_joined = serializers.ReadOnlyField(source="seller.date_joined")
     category_name = serializers.ReadOnlyField(source="category.name")
@@ -61,6 +69,7 @@ class MessageSerializer(serializers.ModelSerializer):
     sender = serializers.ReadOnlyField(source="sender.email")
     recipient_email = serializers.ReadOnlyField(source="recipient.email")
     listing_title = serializers.ReadOnlyField(source="listing.title")
+    body = serializers.CharField(validators=[MinLengthValidator(1)])
 
     class Meta:
         model = Message
