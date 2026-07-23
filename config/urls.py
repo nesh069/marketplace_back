@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from accounts.views import RegisterView
 from marketplace.views import CategoryViewSet, FavouriteViewSet, ListingViewSet, MessageViewSet
-from payments.views import InitiatePaymentView, PaymentStatusView
+from payments.views import InitiatePaymentView, MpesaCallbackView, PaymentStatusView
 
 router = DefaultRouter()
 router.register("listings", ListingViewSet, basename="listing")
@@ -24,6 +24,7 @@ urlpatterns = [
     path("api/accounts/login/refresh/", TokenRefreshView.as_view(), name="login-refresh"),
 
     path("api/payments/pay/", InitiatePaymentView.as_view(), name="initiate-payment"),
+    path("api/payments/callback/", MpesaCallbackView.as_view(), name="mpesa-callback"),
     path("api/payments/status/<int:transaction_id>/", PaymentStatusView.as_view(), name="payment-status"),
 
     path("api/", include(router.urls)),

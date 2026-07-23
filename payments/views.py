@@ -17,7 +17,25 @@ class InitiatePaymentView(APIView):
         listing_id = request.data.get("listing_id")
         phone_number = request.data.get("phone_number")
 
-        listing = Listing.objects.get(id=listing_id)
+        if not listing_id or not phone_number:
+            return Response(
+                {"error": "listing_id and phone_number are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            listing = Listing.objects.get(id=listing_id)
+        except Listing.DoesNotExist:
+            return Response(
+                {"error": "Listing not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if listing.status == "sold":
+            return Response(
+                {"error": "This listing has already been sold"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         transaction = Transaction.objects.create(
             listing=listing,
@@ -26,7 +44,15 @@ class InitiatePaymentView(APIView):
             amount=listing.price,
         )
 
-        MpesaService().initiate_stk_push(transaction)
+        try:
+            MpesaService().initiate_stk_push(transaction)
+        except Exception as e:
+            transaction.status = "failed"
+            transaction.save()
+            return Response(
+                {"error": f"Payment initiation failed: {str(e)}"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
 
         return Response(
             {"transaction_id": transaction.id, "status": transaction.status},
