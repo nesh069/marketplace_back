@@ -32,6 +32,12 @@ class InitiatePaymentView(APIView):
         except Listing.DoesNotExist:
             return Response({"error": "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        if listing.seller == request.user:
+            return Response({"error": "You cannot buy your own listing."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if listing.status == "sold":
+            return Response({"error": "This listing has already been sold."}, status=status.HTTP_400_BAD_REQUEST)
+
         transaction = Transaction.objects.create(
             listing=listing,
             buyer=request.user,

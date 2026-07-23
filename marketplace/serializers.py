@@ -64,6 +64,13 @@ class FavouriteSerializer(serializers.ModelSerializer):
         fields = ["id", "listing", "listing_title", "created_at"]
         read_only_fields = ["created_at"]
 
+    def validate(self, data):
+        request = self.context.get("request")
+        listing = data.get("listing")
+        if request and listing and listing.seller == request.user:
+            raise serializers.ValidationError("You cannot favourite your own listing.")
+        return data
+
 
 class MessageSerializer(serializers.ModelSerializer):
     sender = serializers.ReadOnlyField(source="sender.email")
@@ -76,6 +83,12 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = ["id", "listing", "listing_title", "sender", "recipient", "recipient_email", "body", "created_at", "is_read"]
         read_only_fields = ["sender", "created_at", "is_read"]
 
+    def validate(self, data):
+        request = self.context.get("request")
+        if request and request.user == data.get("recipient"):
+            raise serializers.ValidationError("You cannot send a message to yourself.")
+        return data
+
 
 class ReportSerializer(serializers.ModelSerializer):
     reporter = serializers.ReadOnlyField(source="reporter.email")
@@ -84,3 +97,10 @@ class ReportSerializer(serializers.ModelSerializer):
         model = Report
         fields = ["id", "listing", "reporter", "reason", "description", "created_at"]
         read_only_fields = ["reporter", "created_at"]
+
+    def validate(self, data):
+        request = self.context.get("request")
+        listing = data.get("listing")
+        if request and listing and listing.seller == request.user:
+            raise serializers.ValidationError("You cannot report your own listing.")
+        return data
