@@ -12,12 +12,13 @@ class CategorySerializer(serializers.ModelSerializer):
 class ListingSerializer(serializers.ModelSerializer):
     seller = serializers.ReadOnlyField(source="seller.email")
     seller_id = serializers.ReadOnlyField(source="seller.id")
+    category_name = serializers.ReadOnlyField(source="category.name")
 
     class Meta:
         model = Listing
         fields = [
-            "id", "seller", "seller_id", "category", "title", "description",
-            "price", "image", "status", "created_at",
+            "id", "seller", "seller_id", "category", "category_name",
+            "title", "description", "price", "image", "status", "created_at",
         ]
         read_only_fields = ["seller", "status", "created_at"]
 
