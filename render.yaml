@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: marketplace-back
+    runtime: docker
+    repo: https://github.com/nesh069/marketplace_back
+    branch: dev
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost,127.0.0.1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: marketplace-db
+          property: connectionString
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_SHORTCODE
+        value: "174379"
+      - key: MPESA_CALLBACK_URL
+        value: https://marketplace-back.onrender.com/api/payments/callback/
+      - key: FRONTEND_URL
+        value: https://marketplace-front.onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://marketplace-front.onrender.com
+
+databases:
+  - name: marketplace-db
+    plan: free

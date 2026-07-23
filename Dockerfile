@@ -1,4 +1,4 @@
-FROM python:3.14-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
@@ -14,4 +14,4 @@ COPY . .
 
 RUN python manage.py collectstatic --noinput
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn --bind 0.0.0.0:${PORT:-8000} --timeout 120 config.wsgi:application"]
