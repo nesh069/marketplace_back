@@ -25,7 +25,6 @@ urlpatterns = [
 
     path("api/payments/pay/", InitiatePaymentView.as_view(), name="initiate-payment"),
     path("api/payments/callback/", PesapalCallbackView.as_view(), name="pesapal-callback"),
-    path("api/payments/redirect/", PesapalRedirectView.as_view(), name="pesapal-redirect"),
     path("api/payments/status/<int:transaction_id>/", PaymentStatusView.as_view(), name="payment-status"),
 
     path("api/", include(router.urls)),
