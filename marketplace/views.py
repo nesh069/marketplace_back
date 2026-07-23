@@ -17,13 +17,13 @@ class IsSellerOrReadOnly(permissions.BasePermission):
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
 
 class ListingViewSet(viewsets.ModelViewSet):
     queryset = Listing.objects.all().order_by("-created_at")
     serializer_class = ListingSerializer
-    permission_classes = [permissions.IsAuthenticated, IsSellerOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsSellerOrReadOnly]
     filterset_fields = ["category", "status"]
     search_fields = ["title", "description"]
 
