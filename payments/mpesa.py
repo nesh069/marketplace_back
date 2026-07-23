@@ -15,22 +15,33 @@ class MpesaService:
         ).decode()
         headers = {
             "Authorization": f"Basic {credentials}",
-            "Content-Type": "application/json",
             "User-Agent": "CampusMarketplace/1.0",
         }
-        body = {"grant_type": "client_credentials"}
-        response = requests.post(
-            "https://sandbox.safaricom.co.ke/oauth/v1/generate",
-            params={"grant_type": "client_credentials"},
-            json=body,
+
+        # Try POST with JSON body (bypasses Imperva WAF on some IPs)
+        post_headers = {**headers, "Content-Type": "application/json"}
+        try:
+            response = requests.post(
+                "https://sandbox.safaricom.co.ke/oauth/v1/generate",
+                params={"grant_type": "client_credentials"},
+                json={"grant_type": "client_credentials"},
+                headers=post_headers,
+                timeout=15,
+            )
+            data = response.json()
+            if "access_token" in data:
+                return data["access_token"]
+        except Exception:
+            pass
+
+        # Fallback: GET with query params (standard Daraja method)
+        response = requests.get(
+            "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
             headers=headers,
             timeout=15,
         )
         response.raise_for_status()
-        data = response.json()
-        if "access_token" in data:
-            return data["access_token"]
-        raise RuntimeError(f"Unexpected OAuth response: {data}")
+        return response.json()["access_token"]
 
     def _generate_password(self, timestamp):
         raw = f"{settings.MPESA_SHORTCODE}{settings.MPESA_PASSKEY}{timestamp}"
