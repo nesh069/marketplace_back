@@ -60,10 +60,11 @@ class FavouriteSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     sender = serializers.ReadOnlyField(source="sender.email")
     recipient_email = serializers.ReadOnlyField(source="recipient.email")
+    listing_title = serializers.ReadOnlyField(source="listing.title")
 
     class Meta:
         model = Message
-        fields = ["id", "listing", "sender", "recipient", "recipient_email", "body", "created_at", "is_read"]
+        fields = ["id", "listing", "listing_title", "sender", "recipient", "recipient_email", "body", "created_at", "is_read"]
         read_only_fields = ["sender", "created_at", "is_read"]
 
 
