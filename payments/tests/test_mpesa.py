@@ -13,7 +13,7 @@ class TransactionModelTests(TestCase):
             email='buyer@example.com',
             password='pass123'
         )
-        self.category = Category.objects.create(name='Phones', slug='phones')
+        self.category = Category.objects.create(name='Phones')
         self.listing = Listing.objects.create(
             seller=self.buyer,
             category=self.category,
@@ -29,4 +29,4 @@ class TransactionModelTests(TestCase):
             amount=500.00
         )
         self.assertEqual(transaction.status, 'pending')
-        self.assertEqual(str(transaction), f'Transaction {transaction.id} - pending')
+        self.assertEqual(str(transaction), f"{self.buyer} -> {self.listing} (pending)")

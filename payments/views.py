@@ -50,7 +50,7 @@ class MpesaCallbackView(APIView):
         checkout_request_id = callback.get("checkoutRequestID")
         result_code = callback.get("ResultCode")
         
-        MpesaService().confirm_payment(checkout_request_id, success=(result-code == 0))
+        MpesaService().confirm_payment(checkout_request_id, success=(result_code == 0))
         
         return Response({"ResultCode": 0, "ResultDesc": "Accepted"}, status=status.HTTP_200_OK)
     
