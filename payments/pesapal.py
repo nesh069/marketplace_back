@@ -1,7 +1,12 @@
+import logging
 import uuid
+
 import requests
 from django.conf import settings
+
 from .models import Transaction
+
+logger = logging.getLogger(__name__)
 
 # Sandbox URL
 BASE_URL = "https://cybqa.pesapal.com/pesapalv3"
@@ -80,18 +85,19 @@ class PesapalService:
         response.raise_for_status()
         return response.json()
 
-    def confirm_payment(self, order_tracking_id: str, status: str):
+    def confirm_payment(self, order_tracking_id: str, mapped_status: str, raw_status: str = ""):
         """Update transaction from callback/IPN."""
         try:
             transaction = Transaction.objects.get(checkout_request_id=order_tracking_id)
         except Transaction.DoesNotExist:
+            logger.warning("Transaction not found for order_tracking_id: %s", order_tracking_id)
             return
         
-        if status.lower() in ["completed", "success"]:
+        if mapped_status == "success":
             transaction.status = "success"
             transaction.save()
             transaction.listing.status = "sold"
             transaction.listing.save()
         else:
-            transaction.status = "failed"
+            transaction.status = mapped_status
             transaction.save()
