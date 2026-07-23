@@ -1,3 +1,6 @@
+import logging
+
+from django.conf import settings
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -6,7 +9,7 @@ from rest_framework.views import APIView
 from marketplace.models import Listing
 
 from .models import Transaction
-from .mpesa import MpesaService
+from .pesapal import PesapalService
 from .serializers import TransactionSerializer
 
 
@@ -17,25 +20,10 @@ class InitiatePaymentView(APIView):
         listing_id = request.data.get("listing_id")
         phone_number = request.data.get("phone_number")
 
-        if not listing_id or not phone_number:
-            return Response(
-                {"error": "listing_id and phone_number are required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         try:
             listing = Listing.objects.get(id=listing_id)
         except Listing.DoesNotExist:
-            return Response(
-                {"error": "Listing not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        if listing.status == "sold":
-            return Response(
-                {"error": "This listing has already been sold"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response({"error": "Listing not found"}, status=status.HTTP_404_NOT_FOUND)
 
         transaction = Transaction.objects.create(
             listing=listing,
@@ -45,38 +33,95 @@ class InitiatePaymentView(APIView):
         )
 
         try:
-            MpesaService().initiate_stk_push(transaction)
+            result = PesapalService().initiate_payment(transaction)
+            return Response(result, status=status.HTTP_201_CREATED)
         except Exception as e:
             transaction.status = "failed"
             transaction.save()
-            return Response(
-                {"error": f"Payment initiation failed: {str(e)}"},
-                status=status.HTTP_502_BAD_GATEWAY,
-            )
-
-        return Response(
-            {"transaction_id": transaction.id, "status": transaction.status},
-            status=status.HTTP_201_CREATED,
-        )
+            return Response({"error": f"Payment initiation failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PaymentStatusView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, transaction_id):
-        transaction = Transaction.objects.get(id=transaction_id, buyer=request.user)
+        try:
+            transaction = Transaction.objects.get(id=transaction_id, buyer=request.user)
+        except Transaction.DoesNotExist:
+            return Response({"error": "Transaction not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Check live status from Pesapal
+        if transaction.checkout_request_id:
+            try:
+                pesapal_status = PesapalService().check_status(transaction.checkout_request_id)
+                # Update local status if changed
+                if pesapal_status.get("status") == "COMPLETED" and transaction.status != "success":
+                    transaction.status = "success"
+                    transaction.save()
+                    transaction.listing.status = "sold"
+                    transaction.listing.save()
+            except Exception:
+                pass  # Return cached status if API fails
+        
         return Response(TransactionSerializer(transaction).data)
-    
-    
-class MpesaCallbackView(APIView):
+
+
+class PesapalCallbackView(APIView):
     permission_classes = [AllowAny]
     
-    def post(self, request):
-        callback = request.data.get("Body", {}).get("stkCallback", {})
-        checkout_request_id = callback.get("checkoutRequestID")
-        result_code = callback.get("ResultCode")
-        
-        MpesaService().confirm_payment(checkout_request_id, success=(result_code == 0))
-        
-        return Response({"ResultCode": 0, "ResultDesc": "Accepted"}, status=status.HTTP_200_OK)
+    STATUS_MAP = {
+        "COMPLETED": "success",
+        "PENDING": "pending",
+        "FAILED": "failed",
+        "CANCELLED": "failed",
+        "INVALID": "failed",
+    }
     
+    def post(self, request):
+        """Handle Pesapal IPN/callback."""
+        logger = logging.getLogger(__name__)
+        
+        try:
+            data = request.data
+            
+            # Handle both key formats
+            order_tracking_id = data.get("OrderTrackingId") or data.get("order_tracking_id")
+            raw_status = data.get("Status") or data.get("status", "")
+            
+            if not order_tracking_id:
+                logger.warning("Callback missing order_tracking_id: %s", data)
+                return Response({"status": "received"}, status=status.HTTP_200_OK)
+            
+            # Map Pesapal status to internal status
+            mapped_status = self.STATUS_MAP.get(raw_status.upper(), "pending")
+            
+            PesapalService().confirm_payment(order_tracking_id, mapped_status, raw_status)
+        except Exception as e:
+            logger.exception("Callback error: %s", e)
+        
+        return Response({"status": "received"}, status=status.HTTP_200_OK)
+
+
+class PesapalRedirectView(APIView):
+    permission_classes = [AllowAny]
+
+    STATUS_MAP = PesapalCallbackView.STATUS_MAP
+
+    def get(self, request):
+        """Handle redirect after payment."""
+        order_tracking_id = request.query_params.get("OrderTrackingId") or request.query_params.get("order_tracking_id")
+        raw_status = request.query_params.get("Status") or request.query_params.get("status", "")
+        mapped_status = self.STATUS_MAP.get(raw_status.upper(), "pending")
+
+        if order_tracking_id:
+            try:
+                PesapalService().confirm_payment(order_tracking_id, mapped_status, raw_status)
+            except Exception:
+                pass
+
+        from django.http import HttpResponseRedirect
+        frontend_url = f"{settings.FRONTEND_URL}/payment/callback?status={mapped_status}&order={order_tracking_id}"
+        return HttpResponseRedirect(frontend_url)
+
+
+
