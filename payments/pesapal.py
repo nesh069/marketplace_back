@@ -1,3 +1,4 @@
+import uuid
 import requests
 from django.conf import settings
 from .models import Transaction
@@ -27,7 +28,7 @@ class PesapalService:
         token = self._get_access_token()
         
         payload = {
-            "id": str(transaction.id),
+            "id": str(uuid.uuid4()),
             "currency": "KES",
             "amount": float(transaction.amount),
             "description": f"Purchase of {transaction.listing.title}",
