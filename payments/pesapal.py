@@ -1,4 +1,3 @@
-import base64
 import requests
 from django.conf import settings
 from .models import Transaction
@@ -53,8 +52,10 @@ class PesapalService:
             },
             timeout=30,
         )
-        response.raise_for_status()
         data = response.json()
+
+        if response.status_code != 200 or data.get("error"):
+            raise RuntimeError(data.get("error", data.get("message", response.text)))
         
         transaction.checkout_request_id = data.get("order_tracking_id", "")
         transaction.status = "pending"
