@@ -152,9 +152,11 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-# M-Pesa Configuration
-MPESA_CONSUMER_KEY = os.environ.get('MPESA_CONSUMER_KEY', '')
-MPESA_CONSUMER_SECRET = os.environ.get('MPESA_CONSUMER_SECRET', '')
-MPESA_PASSKEY = os.environ.get('MPESA_PASSKEY', '')
-MPESA_SHORTCODE = os.environ.get('MPESA_SHORTCODE', '174379')
-MPESA_CALLBACK_URL = os.environ.get('MPESA_CALLBACK_URL', 'https://your-ngrok-url.ngrok-free.app/api/payments/callback/')
+# Pesapal Configuration
+PESAPAL_CONSUMER_KEY = os.environ.get('PESAPAL_CONSUMER_KEY', '')
+PESAPAL_CONSUMER_SECRET = os.environ.get('PESAPAL_CONSUMER_SECRET', '')
+PESAPAL_CALLBACK_URL = os.environ.get('PESAPAL_CALLBACK_URL', '')
+PESAPAL_IPN_ID = os.environ.get('PESAPAL_IPN_ID', '')
+
+# Frontend URL (for Pesapal redirect)
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
