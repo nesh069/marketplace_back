@@ -6,7 +6,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from accounts.views import RegisterView, ensure_superuser
+from accounts.views import RegisterView
 from marketplace.views import CategoryViewSet, FavouriteViewSet, ListingViewSet, MessageViewSet, ReportViewSet
 from payments.views import InitiatePaymentView, PesapalCallbackView, PesapalRedirectView, PaymentStatusView
 
@@ -23,7 +23,6 @@ urlpatterns = [
     path("api/accounts/register/", RegisterView.as_view(), name="register"),
     path("api/accounts/login/", TokenObtainPairView.as_view(), name="login"),
     path("api/accounts/login/refresh/", TokenRefreshView.as_view(), name="login-refresh"),
-    path("api/accounts/ensure-superuser/", ensure_superuser, name="ensure-superuser"),
 
     path("api/payments/pay/", InitiatePaymentView.as_view(), name="initiate-payment"),
     path("api/payments/callback/", PesapalCallbackView.as_view(), name="pesapal-callback"),
