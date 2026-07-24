@@ -56,6 +56,18 @@ python manage.py runserver
 | `/api/schema/` | GET | No | OpenAPI schema |
 | `/api/docs/` | GET | No | Swagger UI docs |
 
+## Database Schema
+
+![Database Diagram](docs/db_diagram.png)
+
+**6 Models:**
+1. **User** — Custom auth with email, phone
+2. **Category** — Product categories
+3. **Listing** — Items for sale (FK: seller, category)
+4. **Favourite** — Saved listings (FK: user, listing)
+5. **Message** — Conversations (FK: sender, recipient, listing)
+6. **Transaction** — Payments (FK: listing, buyer)
+
 ## Environment Variables
 
 | Variable | Required | Description |
