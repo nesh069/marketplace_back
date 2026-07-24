@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, NumberFilter
+from drf_spectacular.utils import extend_schema
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -81,6 +82,7 @@ class ListingViewSet(viewsets.ModelViewSet):
 class FavouriteViewSet(viewsets.ModelViewSet):
     serializer_class = FavouriteSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Favourite.objects.none()
 
     def get_queryset(self):
         return Favourite.objects.filter(user=self.request.user)
@@ -92,6 +94,7 @@ class FavouriteViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Message.objects.none()
 
     def get_queryset(self):
         user = self.request.user
@@ -104,6 +107,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 class ReportViewSet(viewsets.ModelViewSet):
     serializer_class = ReportSerializer
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Report.objects.none()
 
     def get_queryset(self):
         user = self.request.user

@@ -2,6 +2,7 @@ import logging
 import re
 
 from django.conf import settings
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -14,8 +15,13 @@ from .pesapal import PesapalService
 from .serializers import TransactionSerializer, normalize_phone, validate_phone_number
 
 
+@extend_schema(
+    request=TransactionSerializer,
+    responses={201: TransactionSerializer},
+)
 class InitiatePaymentView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = TransactionSerializer
 
     def post(self, request):
         listing_id = request.data.get("listing_id")
@@ -61,8 +67,10 @@ class InitiatePaymentView(APIView):
             return Response({"error": f"Payment initiation failed: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(responses={200: TransactionSerializer})
 class PaymentStatusView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = TransactionSerializer
 
     def get(self, request, transaction_id):
         try:
