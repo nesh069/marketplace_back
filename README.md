@@ -58,8 +58,6 @@ python manage.py runserver
 
 ## Database Schema
 
-![Database Diagram](docs/db_diagram.png)
-
 **6 Models:**
 1. **User** — Custom auth with email, phone
 2. **Category** — Product categories
