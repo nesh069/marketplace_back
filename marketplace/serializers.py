@@ -1,4 +1,5 @@
 from django.core.validators import MaxLengthValidator, MaxValueValidator, MinLengthValidator, MinValueValidator
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import Category, Favourite, Listing, Message, Report
@@ -37,6 +38,7 @@ class ListingSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["seller", "created_at"]
 
+    @extend_schema_field(serializers.BooleanField())
     def get_is_favourited(self, obj):
         user = self.context.get("request").user
         if user.is_authenticated:
@@ -56,6 +58,7 @@ class ListingDetailSerializer(ListingSerializer):
 
     reports_count = serializers.SerializerMethodField()
 
+    @extend_schema_field(serializers.IntegerField())
     def get_reports_count(self, obj):
         return obj.reports.count()
 
