@@ -82,12 +82,15 @@ class PaymentStatusView(APIView):
         if transaction.checkout_request_id:
             try:
                 pesapal_status = PesapalService().check_status(transaction.checkout_request_id)
-                # Update local status if changed
-                if pesapal_status.get("status") == "COMPLETED" and transaction.status != "success":
+                raw = (pesapal_status.get("status") or "").upper()
+                if raw == "COMPLETED" and transaction.status != "success":
                     transaction.status = "success"
                     transaction.save()
                     transaction.listing.status = "sold"
                     transaction.listing.save()
+                elif raw in ("FAILED", "CANCELLED", "INVALID") and transaction.status not in ("success", "failed"):
+                    transaction.status = "failed"
+                    transaction.save()
             except Exception:
                 pass  # Return cached status if API fails
         
