@@ -36,7 +36,7 @@ class ListingSerializer(serializers.ModelSerializer):
             "category_name", "title", "description", "price", "image",
             "status", "created_at", "is_favourited",
         ]
-        read_only_fields = ["seller", "created_at"]
+        read_only_fields = ["seller", "created_at", "image"]
 
     @extend_schema_field(serializers.BooleanField())
     def get_is_favourited(self, obj):

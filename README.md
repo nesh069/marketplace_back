@@ -85,7 +85,8 @@ python manage.py runserver
 | `PESAPAL_CALLBACK_URL` | Yes | Backend callback URL |
 | `PESAPAL_IPN_ID` | Yes | Pesapal IPN registration ID |
 | `FRONTEND_URL` | Yes | Frontend URL for redirect |
-| `CLOUDINARY_CLOUD_NAME` | No | Cloudinary (image upload) |
+| `IMGBB_API_KEY` | Yes | ImgBB API key (image upload) |
+| `CLOUDINARY_CLOUD_NAME` | No | Cloudinary (alternative image upload) |
 | `CLOUDINARY_API_KEY` | No | Cloudinary (image upload) |
 | `CLOUDINARY_API_SECRET` | No | Cloudinary (image upload) |
 

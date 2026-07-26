@@ -25,7 +25,7 @@ class Listing(models.Model):
     title = models.CharField(max_length=120)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to="listings/", blank=True, null=True)
+    image = models.CharField(max_length=500, blank=True, null=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="available")
     created_at = models.DateTimeField(auto_now_add=True)
 
