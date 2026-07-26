@@ -209,3 +209,6 @@ PESAPAL_IPN_ID = os.environ.get('PESAPAL_IPN_ID', '')
 
 # Frontend URL (for Pesapal redirect)
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+
+# ImgBB API key (image upload)
+IMGBB_API_KEY = os.environ.get('IMGBB_API_KEY', '')

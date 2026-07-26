@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Category, Favourite, Listing, Message, Report
+from .imgbb import upload_image
 from .serializers import (
     CategorySerializer, FavouriteSerializer,
     ListingDetailSerializer, ListingSerializer,
@@ -48,7 +49,22 @@ class ListingViewSet(viewsets.ModelViewSet):
         return ListingSerializer
 
     def perform_create(self, serializer):
-        serializer.save(seller=self.request.user)
+        image_file = self.request.FILES.get("image")
+        extra = {"seller": self.request.user}
+        if image_file:
+            url = upload_image(image_file)
+            if url:
+                extra["image"] = url
+        serializer.save(**extra)
+
+    def perform_update(self, serializer):
+        image_file = self.request.FILES.get("image")
+        extra = {}
+        if image_file:
+            url = upload_image(image_file)
+            if url:
+                extra["image"] = url
+        serializer.save(**extra)
 
     def get_serializer_context(self):
         return {"request": self.request}
