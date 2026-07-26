@@ -91,8 +91,11 @@ class ListingViewSet(viewsets.ModelViewSet):
     def favourites(self, request):
         favourited = Listing.objects.filter(favourited_by__user=request.user)
         page = self.paginate_queryset(favourited)
-        serializer = ListingSerializer(page, many=True, context={"request": request})
-        return self.get_paginated_response(serializer.data)
+        if page is not None:
+            serializer = ListingSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+        serializer = ListingSerializer(favourited, many=True, context={"request": request})
+        return Response(serializer.data)
 
 
 class FavouriteViewSet(viewsets.ModelViewSet):
