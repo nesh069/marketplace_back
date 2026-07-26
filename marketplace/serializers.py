@@ -28,13 +28,14 @@ class ListingSerializer(serializers.ModelSerializer):
     seller_joined = serializers.ReadOnlyField(source="seller.date_joined")
     category_name = serializers.ReadOnlyField(source="category.name")
     is_favourited = serializers.SerializerMethodField()
+    favourite_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Listing
         fields = [
             "id", "seller", "seller_id", "seller_joined", "category",
             "category_name", "title", "description", "price", "image",
-            "status", "created_at", "is_favourited",
+            "status", "created_at", "is_favourited", "favourite_id",
         ]
         read_only_fields = ["seller", "created_at", "image"]
 
@@ -44,6 +45,14 @@ class ListingSerializer(serializers.ModelSerializer):
         if user.is_authenticated:
             return Favourite.objects.filter(user=user, listing=obj).exists()
         return False
+
+    @extend_schema_field(serializers.IntegerField(allow_null=True))
+    def get_favourite_id(self, obj):
+        user = self.context.get("request").user
+        if user.is_authenticated:
+            fav = Favourite.objects.filter(user=user, listing=obj).first()
+            return fav.id if fav else None
+        return None
 
     def update(self, instance, validated_data):
         if "status" in validated_data:
