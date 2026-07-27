@@ -49,10 +49,14 @@ class ListingViewSet(viewsets.ModelViewSet):
         return ListingSerializer
 
     def perform_create(self, serializer):
+        import logging
+        logger = logging.getLogger(__name__)
         image_file = self.request.FILES.get("image")
+        logger.error("DEBUG perform_create: FILES keys=%s, has_image=%s", list(self.request.FILES.keys()), image_file is not None)
         extra = {"seller": self.request.user}
         if image_file:
             url = upload_image(image_file)
+            logger.error("DEBUG perform_create: upload_image returned url=%s len=%s", url, len(url) if url else 0)
             if url:
                 extra["image"] = url
         serializer.save(**extra)
