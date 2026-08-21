@@ -2,6 +2,7 @@ from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet, NumberFilter
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, permissions, status, viewsets
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -42,6 +43,7 @@ class ListingViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsSellerOrReadOnly]
     filterset_class = ListingFilter
     search_fields = ["title", "description"]
+    parser_classes = [MultiPartParser, FormParser]
 
     def get_serializer_class(self):
         if self.action == "retrieve":
